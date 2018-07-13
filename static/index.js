@@ -24,7 +24,7 @@ idNumb = number of item ||| books = object data with information about book */
             };
         };
     };
-    localStorage.clear(); //очищення поперденіх значень localStorage
+    localStorage.clear(); //очищення попередніх значень localStorage
     localStorage.setItem('structureL', JSON.stringify(divL)); //формування нового localStorage ключа structureL для лівої та правої 
     localStorage.setItem('structureR', JSON.stringify(divR)); //панелей книжок, попередньо джейсонимо відповідні об"єкти
 };
@@ -69,21 +69,29 @@ function addElement(idNumb, author, name, img, selected ) { //add new div-elemen
     
     let newDivAfter = document.createElement('div');  //... аналогічно створємо контейнер для стрілки - елементу керування списком
     
-    if (selected === false) {  //визначаємо де повинна розрашотуватися стрілка - якщо зліва то...
+    if (selected === false) {  //визначаємо де повинна розрашовуватися стрілка - якщо зліва то...
         newDivAfter.className = 'after';  // новому контейнеру присвоюємо клас after
     } else {
         newDivAfter.className = 'before'; // інакше новому контейнеру присвоюємо клас before
     };
     newDivAfter.addEventListener('click', function(event){ //елементу керування - стрілці - призначаємо обробник події - на клацання мишки.
         addElement(idNumb, author, name, img, !selected); //виклик процедури додавання нової книги в іншому списку (інакшому від поточного)
+        (selected === true) ? counter('left',true) : counter('right',true); // виклик функції зміни лічильника при додаванні нового елемента книжки в іншу панель(+1)
         let obj = {}; // створюємо новий об"єкт, що буде містити дані про поточну книжку, яку вирішено перемістити
         obj.author = author; // присвоєння параметрів книги відповідним властивостям об"єктів 
         obj.name = name;
         obj.img = img;
         localStrg(idNumb,obj,!selected, false);// виклик функції модифікації localStorage і побудови нового списку книжок на обох панелях
         newDivAfter.parentNode.parentNode.removeChild(newDivAfter.parentNode); // видалення поточної книжки в поточному списку
+        (selected === false) ? counter('left',false) : counter('right',false); // виклик функції зміни лічильника при видаленні елемента книжки з поточної панелі(1)
        });
     newDivItem.appendChild(newDivAfter); // відрисовування управляючого блоку зі стрілочкою
+}
+
+var counter = function(selected, increment) { // function for counter increment/decrement.
+/*selected 'left' =  left panel of counter of 'reght' = right panel ||| inctement 'true' = ++counter or 'false' = --counter*/
+    let changeValue = (selected==='left') ? document.getElementById('#countLeft') : document.getElementById('#countRight'); // вибираємо панель для зміни даних
+    changeValue.innerText =  (increment === true) ? ++changeValue.innerText : --changeValue.innerText; // обираємо дію - інкремент або деккремент і змінюємо поточне значення
 }
 
 function convertJSON(data, restore, columL){ // convert object, which create after JSON-parce, into set of book parameters and call function 'addElement'
@@ -105,11 +113,14 @@ restore 'true' = load object data from localStorage or 'false' = load from JSON-
         };
         if (restore === false) {   //якщо ми не відновлюємо дані з localStorage, то
             addElement(elementJsonObj, author, name, img, false); // виликаємо фукнцію відрисовування відуальних елементів на сторінці ЛИШЕ для лівого div
+            counter('left',true); // викликаємо функцію інкременту лічильника для лівої панелі
         } else { // інакше ... (якщо відновлюємо дані з localStorage, то дані можуть бути в обох колонках)
             if (columL === true) { // якщо функція передана для відрисовування елементів лівої колонки, то...
                 addElement(elementJsonObj, author, name, img, false); // виликаємо фукнцію відрисовування відуальних елементів на сторінці для лівого div
+                counter('left',true); // викликаємо функцію інкременту лічильника для лівої панелі
             } else {
                 addElement(elementJsonObj, author, name, img, true); // виликаємо фукнцію відрисовування відуальних елементів на сторінці для правого div
+                counter('right',true); // викликаємо функцію інкременту лічильника для правої панелі
             };
         };
     };
@@ -129,7 +140,9 @@ function inputLisnt(){  // listen input element for find books in the left and t
         if (input.value.length > 2) { //якщо в input введено 3 і більше символів то..
             removeAllChild(document.querySelector('div .left')); // видаляємо всі книжки що були відображені на панелях
             removeAllChild(document.querySelector('div .right')); // обох панелях...
-              for (i=0; i<=1; i++) { // запускаємо цикл на 2 ітерації - для лівої і правої панелей
+            document.getElementById('#countLeft').innerText = 0; // обнуляємо значення лічильників для панелі
+            document.getElementById('#countRight').innerText = 0; // обох панелей...
+            for (i=0; i<=1; i++) { // запускаємо цикл на 2 ітерації - для лівої і правої панелей
                 let dataJson = (i === 0) ? divL : divR; // в залежності від ітерації вибираємо один з двох глобальних об"єктів що містять інфу про вміст панелей
                 let elementJsonObj, innerElementJsonObj; //оголошення змінних для перебору ключів параметрів об"єктів 
                 for (elementJsonObj in dataJson){ //перебір елементів загального об"єкту з набором книжок, почергово для кожної книги
@@ -141,25 +154,28 @@ function inputLisnt(){  // listen input element for find books in the left and t
                             default : alert('errore! bed format of JSON file!'); //якщо щось пішло не так, видаємо помилку
                         };                      
                     };
-                    console.log(input.value);
                     if (author.toLowerCase().indexOf(input.value.toLowerCase()) >= 0) { //якщо в процесі перебору книжок метод indexOf знаходить частину введеної
                         // в input стрічки, то її позиція буде більшою, ніж "-1" - отже відповідність знайдена, пошук книжки успішний, і пошук регістроНЕзалежний!
                         let selected = (i===0) ? false : true; // визначаємо в якій панелі відбувся пошук.
                         addElement(elementJsonObj, author, name, img, selected);  //викликаємо функцію відрисовування нового div item елемента про успішно знайдену книжку
-                     };
+                        (i === 0) ? counter('left',true) : counter('right',true); // викликаємо функцію зміни лічильника книжок для лівої або правої панелей
+                    };
                 };
             };
         }; 
         if (input.value.length === 0)   { //якщо поле пошуку повністю очищенне то..
             removeAllChild(document.querySelector('div .left')); //очищення списку всіх виведених div item з книжками в лівій частині 
             removeAllChild(document.querySelector('div .right')); //аналогічно для правої частині 
+            document.getElementById('#countLeft').innerText = 0; // обнулення лічильників книжок 
+            document.getElementById('#countRight').innerText = 0; // і для правої панелі теж
             convertJSON(divL,true,true); //виклик функції розшировки глобальних об"єктів з книжками для подальшої відрисовки їх в лівій частині
             convertJSON(divR,true,false); //аналогічні для правого списку (обидваі завжди відновлюються зі збережених глобальних об"єктів,тому 2-й параметр true)
         };
     };
 };
 
-function scanJsonFile(fileJson, callbackFunc) {
+function scanJsonFile(fileJson, callbackFunc) { // function for load JSON file with information about books
+    /* fileJson = name of JSON file ||| callbackFunc - exec if JSON file is load*/
     let rqstFile = new XMLHttpRequest(); // створюємо об"єкт XMLHttpRequest
     rqstFile.overrideMimeType('application/json'); // очікуємо отримати json файл
     rqstFile.open('GET', fileJson, true); //ініціалізуємо відкриття json файлу за методом GET
@@ -171,9 +187,32 @@ function scanJsonFile(fileJson, callbackFunc) {
     rqstFile.send(null); //посилаємо запит на відкриття, тип запиту GET отже параметр null
 };
 
+var modifiсationHTML = function(){ // function for drawing elements for book`s counters
+    //ця функція тут лише тому, що булоа вимога не змінювати верстку html файла
+    let newDivL = document.createElement('div'); // створення div для лічильника лівої панелі книжок
+    newDivL.id = '#countLeft'; // присвоєння div ідентифікатора
+    newDivL.innerText='0'; // запис в div нуля
+    newDivL.style = 'overflow-y: auto; min-width: 450px; text-align: center'; //присвоєння стилів для div
+
+    let newDivR = document.createElement('div'); // аналогічно для іншої панелі
+    newDivR.id = '#countRight';
+    newDivR.innerText='0';
+    newDivR.style = 'overflow-y: auto; min-width: 450px; text-align: center';
+
+    let newDivWidth = document.createElement('div'); // створення загального контейнера для лічильників
+    newDivWidth.style='width: 100%; display: flex; flex-wrap: wrap;';
+    
+    let parentDiv = document.querySelector('.content'); // визначення батьківського контейнера 
+    parentDiv.insertBefore(newDivWidth, parentDiv.lastChild); // вставлення на сторінку елементів для відображення лічильників
+    newDivWidth.insertBefore(newDivR, newDivWidth.lastChild);
+    newDivWidth.insertBefore(newDivL, newDivWidth.lastChild);
+};
+
 scanJsonFile('/static/data.json', function(text){ // start function for load JSON-file
     divL = JSON.parse(localStorage.getItem('structureL')); // присваюємо об"єктам відповідні значення обох структур localStorage
     divR = JSON.parse(localStorage.getItem('structureR')); // якщо таких стркутур нема (перший запус), то об"єкти стануть null
+
+    modifiсationHTML(); // виклик функції відрисовування недостаючих елементів html сторінки
 
     if ((divL === null) || (divR === null)) { //перевіряємо чи стали  об"єкти null і якщо так то ...
         divL = {};  // присваюємо змінним значення пустих об"єктів повторно
@@ -185,5 +224,4 @@ scanJsonFile('/static/data.json', function(text){ // start function for load JSO
     convertJSON(divR,true,false); //(в ту саму функцію, що і трьома стрічками вище, але вводимо додаткий атрибут - колонка в якій будуть відрисовані книжки) 
     };
     inputLisnt(); // виклик функції присвоєння обробника для зміни вмісту поля пошуку (організація слідкування за введенням даних в поле пошуку)
-
 });
