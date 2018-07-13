@@ -5,7 +5,6 @@ var divL = {}, divR ={}; //main objects with information about books in the left
 function localStrg(idNumb, books, selected, operation){ // function for created localStorage
 /*selected 'true' = div right or 'false' = div left ||| operation 'true' = add item or 'false'  = replace item |||
 idNumb = number of item ||| books = object data with information about book */
-    console.log(idNumb, selected, operation);
     if (operation === true) {   // якщо додавання книжки в стек
         if (selected === false ) {  //якщо стек лівий
             divL[idNumb] = books;   // створюємо у об"єкта divL новий ключ idNumb з даними про книжку
@@ -26,91 +25,136 @@ idNumb = number of item ||| books = object data with information about book */
         };
     };
     localStorage.clear(); //очищення поперденіх значень localStorage
-    console.log(divL, divR);
     localStorage.setItem('structureL', JSON.stringify(divL)); //формування нового localStorage ключа structureL для лівої та правої 
     localStorage.setItem('structureR', JSON.stringify(divR)); //панелей книжок, попередньо джейсонимо відповідні об"єкти
 };
 
-function addElement(idNumb, author, name, img, selected ) {
-    let newDivItem = document.createElement('div');
-        newDivItem.className = 'item';
-        newDivItem.id = idNumb;
-    let parentDivItem;
+function addElement(idNumb, author, name, img, selected ) { //add new div-element about book
+/*idNumb = number of item |||  author, name, img = parameters of book ||| selected 'true' = div right or 'false' = div left */
+    let newDivItem = document.createElement('div'); //створюєм елемент div - загальний контейнер для книжки
+        newDivItem.className = 'item';//призначаєм йому клас item
+        newDivItem.id = idNumb; //і індентифікатор - порядковий номер в каталозі
+    let parentDivItem; // оголошуєм змінну для збереження батьківського елемента для div
 
-    if (selected === false) {
-        parentDivItem = document.querySelector('div .left');
+    if (selected === false) { //якщо  книжка повинна знаходитися в лівій частині то...
+        parentDivItem = document.querySelector('div .left');  //батьківський контейнер буде div класу left
         } else {
-        parentDivItem = document.querySelector('div .right');   
+        parentDivItem = document.querySelector('div .right');  //батьківський контейнер буде div класу right  
         };
-    parentDivItem.insertBefore(newDivItem, parentDivItem.lastChild);
+    parentDivItem.insertBefore(newDivItem, parentDivItem.lastChild); //вставляємо створений div на сторінку
     
-    let newDivPic = document.createElement('div');
+    let newDivPic = document.createElement('div'); //... аналогічно створюємо контейнер для зображення обкладинки книжки
     newDivPic.className = 'pic';    
     newDivItem.appendChild(newDivPic);
 
-    let newDivPicSpan = document.createElement('span');
+    let newDivPicSpan = document.createElement('span'); 
     newDivPic.appendChild(newDivPicSpan);
     
     let newDivPicSpanImg = document.createElement('img');
-    newDivPicSpanImg.src = img;
+    newDivPicSpanImg.src = img;  //атрибуту src тега img присвоюємо гіпертекстове посилання на зображення обкладинки 
     newDivPicSpan.appendChild(newDivPicSpanImg);
     
-    let newDivTitle = document.createElement('div');
+    let newDivTitle = document.createElement('div'); //... аналогічно створємо контейнер для заголовку книжки
     newDivTitle.className = 'title';    
     newDivItem.appendChild(newDivTitle);
 
     let newDivTitleSpanName = document.createElement('span');
-    newDivTitleSpanName.innerHTML = '<b>Название</b>:&nbsp"'+name+'"';
+    newDivTitleSpanName.innerHTML = '<b>Название</b>:&nbsp"'+name+'"'; // вставляємо в створений span блок назву книжки
     newDivTitle.appendChild(newDivTitleSpanName);
     
     let newDivTitleSpanAuthor = document.createElement('span');
     newDivPic.className = 'author';
-    newDivTitleSpanAuthor.innerHTML = '<b>Автор</b>:&nbsp'+author;
+    newDivTitleSpanAuthor.innerHTML = '<b>Автор</b>:&nbsp'+author; // вставляємо в створений span блок автора
     newDivTitle.appendChild(newDivTitleSpanAuthor);
     
-    let newDivAfter = document.createElement('div');
+    let newDivAfter = document.createElement('div');  //... аналогічно створємо контейнер для стрілки - елементу керування списком
     
-    if (selected === false) { 
-        newDivAfter.className = 'after';
+    if (selected === false) {  //визначаємо де повинна розрашотуватися стрілка - якщо зліва то...
+        newDivAfter.className = 'after';  // новому контейнеру присвоюємо клас after
     } else {
-        newDivAfter.className = 'before';   
+        newDivAfter.className = 'before'; // інакше новому контейнеру присвоюємо клас before
     };
-    newDivAfter.addEventListener('click', function(event){
-        addElement(idNumb, author, name, img, !selected);
-        let obj = {};
-        obj.author = author;
+    newDivAfter.addEventListener('click', function(event){ //елементу керування - стрілці - призначаємо обробник події - на клацання мишки.
+        addElement(idNumb, author, name, img, !selected); //виклик процедури додавання нової книги в іншому списку (інакшому від поточного)
+        let obj = {}; // створюємо новий об"єкт, що буде містити дані про поточну книжку, яку вирішено перемістити
+        obj.author = author; // присвоєння параметрів книги відповідним властивостям об"єктів 
         obj.name = name;
         obj.img = img;
-        localStrg(idNumb,obj,!selected, false);
-        newDivAfter.parentNode.parentNode.removeChild(newDivAfter.parentNode);
- 
-        });
-    newDivItem.appendChild(newDivAfter);
+        localStrg(idNumb,obj,!selected, false);// виклик функції модифікації localStorage і побудови нового списку книжок на обох панелях
+        newDivAfter.parentNode.parentNode.removeChild(newDivAfter.parentNode); // видалення поточної книжки в поточному списку
+       });
+    newDivItem.appendChild(newDivAfter); // відрисовування управляючого блоку зі стрілочкою
 }
 
-function convertJSON(data, restore, columL){ 
-    let elementJsonObj, innerElementJsonObj;
-    let author, name, img;
-    for(elementJsonObj in data){
-        if (restore !== true) {
-            localStrg(elementJsonObj, data[elementJsonObj],false, true);
+function convertJSON(data, restore, columL){ // convert object, which create after JSON-parce, into set of book parameters and call function 'addElement'
+/*data = object, which consist of books after parce JSON-file of localStorage ||| columL 'true' = div left or 'false' = div right ('undefined' if restore = 'false' )
+restore 'true' = load object data from localStorage or 'false' = load from JSON-file (if site first start)  */
+    let elementJsonObj, innerElementJsonObj; //оголошення змінних для перебору ключів параметрів об"єктів 
+    let author, name, img; //оголошення змінних для збереження значень параметрів об"єктів
+    for(elementJsonObj in data){ //перебір елементів загального об"єкту з набором книжок, почергово для кожної книги
+        if (restore !== true) { // якщо ми НЕ відновлюємо дані з localStorage то...
+            localStrg(elementJsonObj, data[elementJsonObj],false, true); // викликаємо функцію початкового формування localStorage 
         };
-        for(innerElementJsonObj in data[elementJsonObj]){
-            switch (innerElementJsonObj) {
-                case 'author' : author = data[elementJsonObj][innerElementJsonObj]; break;
-                case 'name' : name = data[elementJsonObj][innerElementJsonObj]; break;
-                case 'img' : img = data[elementJsonObj][innerElementJsonObj]; break;
-                default : alert('errore! bed format of JSON file!');
+        for(innerElementJsonObj in data[elementJsonObj]){ //перебір всіх властивостей кожної книжки 
+            switch (innerElementJsonObj) { // розділяємо властивості по їх семантичному значенню
+                case 'author' : author = data[elementJsonObj][innerElementJsonObj]; break; // якщо ключ автор, то присвоюємо значення відповідній змінній
+                case 'name' : name = data[elementJsonObj][innerElementJsonObj]; break; //аналогічно - для назви
+                case 'img' : img = data[elementJsonObj][innerElementJsonObj]; break; // аналогічно - для посиланя на зображення
+                default : alert('errore! bed format of JSON file!'); // інаше - видаємо помилку
             };
         };
-        if (restore === false) {
-            addElement(elementJsonObj, author, name, img, false);
-        } else {
-            if (columL === true) {
-                addElement(elementJsonObj, author, name, img, false);
+        if (restore === false) {   //якщо ми не відновлюємо дані з localStorage, то
+            addElement(elementJsonObj, author, name, img, false); // виликаємо фукнцію відрисовування відуальних елементів на сторінці ЛИШЕ для лівого div
+        } else { // інакше ... (якщо відновлюємо дані з localStorage, то дані можуть бути в обох колонках)
+            if (columL === true) { // якщо функція передана для відрисовування елементів лівої колонки, то...
+                addElement(elementJsonObj, author, name, img, false); // виликаємо фукнцію відрисовування відуальних елементів на сторінці для лівого div
             } else {
-                addElement(elementJsonObj, author, name, img, true);
+                addElement(elementJsonObj, author, name, img, true); // виликаємо фукнцію відрисовування відуальних елементів на сторінці для правого div
             };
+        };
+    };
+};
+
+function inputLisnt(){  // listen input element for find books in the left and the right lists
+    
+    let removeAllChild = function(parentNode){ // function for clear all div-item with books information 
+        let lastChild; // змінна для збереження останнього нащадка для DOM об"єкта
+        while (lastChild = parentNode.lastChild)  // поки існують дочірні елементи 
+            parentNode.removeChild(lastChild); // видаляєм дочірні елементи
+    };
+
+    let author, name, img; // оголошення змінних для збереження параметрів книжки
+    let input = document.querySelector('input'); //знаходимо на html сторінці перший і єдиний об"єкт input
+    input.oninput = function() { // встановлюємо йому обробник на введення даних - oninput
+        if (input.value.length > 2) { //якщо в input введено 3 і більше символів то..
+            removeAllChild(document.querySelector('div .left')); // видаляємо всі книжки що були відображені на панелях
+            removeAllChild(document.querySelector('div .right')); // обох панелях...
+              for (i=0; i<=1; i++) { // запускаємо цикл на 2 ітерації - для лівої і правої панелей
+                let dataJson = (i === 0) ? divL : divR; // в залежності від ітерації вибираємо один з двох глобальних об"єктів що містять інфу про вміст панелей
+                let elementJsonObj, innerElementJsonObj; //оголошення змінних для перебору ключів параметрів об"єктів 
+                for (elementJsonObj in dataJson){ //перебір елементів загального об"єкту з набором книжок, почергово для кожної книги
+                    for(innerElementJsonObj in dataJson[elementJsonObj]){ //перебір всіх властивостей кожної книжки 
+                        switch (innerElementJsonObj) { // розділяємо ключі параметрів по їх семантичному значенню і присваюємо значення відповідним змінним
+                            case 'author' : author = dataJson[elementJsonObj][innerElementJsonObj]; break;
+                            case 'name' : name = dataJson[elementJsonObj][innerElementJsonObj]; break;
+                            case 'img' : img = dataJson[elementJsonObj][innerElementJsonObj]; break;
+                            default : alert('errore! bed format of JSON file!'); //якщо щось пішло не так, видаємо помилку
+                        };                      
+                    };
+                    console.log(input.value);
+                    if (author.toLowerCase().indexOf(input.value.toLowerCase()) >= 0) { //якщо в процесі перебору книжок метод indexOf знаходить частину введеної
+                        // в input стрічки, то її позиція буде більшою, ніж "-1" - отже відповідність знайдена, пошук книжки успішний, і пошук регістроНЕзалежний!
+                        let selected = (i===0) ? false : true; // визначаємо в якій панелі відбувся пошук.
+                        addElement(elementJsonObj, author, name, img, selected);  //викликаємо функцію відрисовування нового div item елемента про успішно знайдену книжку
+                     };
+                };
+            };
+        }; 
+        if (input.value.length === 0)   { //якщо поле пошуку повністю очищенне то..
+            removeAllChild(document.querySelector('div .left')); //очищення списку всіх виведених div item з книжками в лівій частині 
+            removeAllChild(document.querySelector('div .right')); //аналогічно для правої частині 
+            convertJSON(divL,true,true); //виклик функції розшировки глобальних об"єктів з книжками для подальшої відрисовки їх в лівій частині
+            convertJSON(divR,true,false); //аналогічні для правого списку (обидваі завжди відновлюються зі збережених глобальних об"єктів,тому 2-й параметр true)
         };
     };
 };
@@ -137,8 +181,9 @@ scanJsonFile('/static/data.json', function(text){ // start function for load JSO
         let data = JSON.parse(text); //а в змінну data вносимо всі розпарсені об"єкти, що завантажено з JSON файла при завантаженні сторінки
         convertJSON(data, false); //змінну data відправляєм у функцію розшифровки об"єктів з даними книжов і фомрування візуального списку
     } else { // інакше ключі localStorage були не пусті, сайт відвіданий не вперше, треба працювати зі збереженими даними
-    convertJSON(divL,true,true); //збережені дані відправляєм у функцію розшифровки об"єктів з даними книжов і фомрування візуального списку
+    convertJSON(divL,true,true); //збережені дані відправляєм у функцію розшифровки об"єктів з даними книжок і формування візуального списку
     convertJSON(divR,true,false); //(в ту саму функцію, що і трьома стрічками вище, але вводимо додаткий атрибут - колонка в якій будуть відрисовані книжки) 
     };
+    inputLisnt(); // виклик функції присвоєння обробника для зміни вмісту поля пошуку (організація слідкування за введенням даних в поле пошуку)
 
 });
