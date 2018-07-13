@@ -1,4 +1,57 @@
 
+function addElement(idNumb, author, name, img, selected ) {
+    let newDivItem = document.createElement('div');
+        newDivItem.className = 'item';
+        newDivItem.id = idNumb;
+    let parentDivItem;
+
+    if (selected === false) {
+        parentDivItem = document.querySelector('div .left');
+        } else {
+        parentDivItem = document.querySelector('div .right');   
+        };
+    parentDivItem.insertBefore(newDivItem, parentDivItem.lastChild);
+    
+    let newDivPic = document.createElement('div');
+    newDivPic.className = 'pic';    
+    newDivItem.appendChild(newDivPic);
+
+    let newDivPicSpan = document.createElement('span');
+    newDivPic.appendChild(newDivPicSpan);
+    
+    let newDivPicSpanImg = document.createElement('img');
+    newDivPicSpanImg.src = img;
+    newDivPicSpan.appendChild(newDivPicSpanImg);
+    
+    let newDivTitle = document.createElement('div');
+    newDivTitle.className = 'title';    
+    newDivItem.appendChild(newDivTitle);
+
+    let newDivTitleSpanName = document.createElement('span');
+    newDivTitleSpanName.innerHTML = '<b>Название</b>:&nbsp"'+name+'"';
+    newDivTitle.appendChild(newDivTitleSpanName);
+    
+    let newDivTitleSpanAuthor = document.createElement('span');
+    newDivPic.className = 'author';
+    newDivTitleSpanAuthor.innerHTML = '<b>Автор</b>:&nbsp'+author;
+    newDivTitle.appendChild(newDivTitleSpanAuthor);
+    
+    let newDivAfter = document.createElement('div');
+    
+    if (selected === false) { 
+        newDivAfter.className = 'after';
+    } else {
+        newDivAfter.className = 'before';   
+    };
+    newDivAfter.addEventListener('click', function(event){
+        addElement(idNumb, author, name, img, !selected);
+     
+        newDivAfter.parentNode.parentNode.removeChild(newDivAfter.parentNode);
+ 
+        });
+    newDivItem.appendChild(newDivAfter);
+}
+
 
 
 
@@ -15,8 +68,8 @@ function convertJSON(data){
             };
 
         };
-                 console.log(author,name,img);
-       // addElement();
+       console.log(author,name,img);
+        addElement(elementJsonObj, author, name, img, true);
     };
 };
 
