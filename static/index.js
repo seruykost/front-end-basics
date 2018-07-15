@@ -2,7 +2,7 @@
 
 var divL = {}, divR ={}; //main objects with information about books in the left and the right divs
 
-function localStrg(idNumb, books, selected, operation){ // function for created localStorage
+var localStrg = function(idNumb, books, selected, operation){ // function for created localStorage
 /*selected 'true' = div right or 'false' = div left ||| operation 'true' = add item or 'false'  = replace item |||
 idNumb = number of item ||| books = object data with information about book */
     if (operation === true) {   // якщо додавання книжки в стек
@@ -29,7 +29,7 @@ idNumb = number of item ||| books = object data with information about book */
     localStorage.setItem('structureR', JSON.stringify(divR)); //панелей книжок, попередньо джейсонимо відповідні об"єкти
 };
 
-function addElement(idNumb, author, name, img, selected ) { //add new div-element about book
+var addElement = function(idNumb, author, name, img, selected ) { //add new div-element about book
 /*idNumb = number of item |||  author, name, img = parameters of book ||| selected 'true' = div right or 'false' = div left */
     let newDivItem = document.createElement('div'); //створюєм елемент div - загальний контейнер для книжки
         newDivItem.className = 'item';//призначаєм йому клас item
@@ -94,7 +94,7 @@ var counter = function(selected, increment) { // function for counter increment/
     changeValue.innerText =  (increment === true) ? ++changeValue.innerText : --changeValue.innerText; // обираємо дію - інкремент або деккремент і змінюємо поточне значення
 }
 
-function convertJSON(data, restore, columL){ // convert object, which create after JSON-parce, into set of book parameters and call function 'addElement'
+var convertJSON = function(data, restore, columL){ // convert object, which create after JSON-parce, into set of book parameters and call function 'addElement'
 /*data = object, which consist of books after parce JSON-file of localStorage ||| columL 'true' = div left or 'false' = div right ('undefined' if restore = 'false' )
 restore 'true' = load object data from localStorage or 'false' = load from JSON-file (if site first start)  */
     let elementJsonObj, innerElementJsonObj; //оголошення змінних для перебору ключів параметрів об"єктів 
@@ -126,7 +126,7 @@ restore 'true' = load object data from localStorage or 'false' = load from JSON-
     };
 };
 
-function inputLisnt(){  // listen input element for find books in the left and the right lists
+var inputLisnt = function(){  // listen input element for find books in the left and the right lists
     
     let removeAllChild = function(parentNode){ // function for clear all div-item with books information 
         let lastChild; // змінна для збереження останнього нащадка для DOM об"єкта
@@ -174,7 +174,7 @@ function inputLisnt(){  // listen input element for find books in the left and t
     };
 };
 
-function scanJsonFile(fileJson, callbackFunc) { // function for load JSON file with information about books
+var scanJsonFile = function(fileJson, callbackFunc) { // function for load JSON file with information about books
     /* fileJson = name of JSON file ||| callbackFunc - exec if JSON file is load*/
     let rqstFile = new XMLHttpRequest(); // створюємо об"єкт XMLHttpRequest
     rqstFile.overrideMimeType('application/json'); // очікуємо отримати json файл
